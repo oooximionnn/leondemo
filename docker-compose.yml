@@ -103,12 +103,13 @@ services:
   app1:
     build: .
     container_name: leondemo-app
+#    platform: linux/arm64
     environment:
       DB_POSTGRES_URL: jdbc:postgresql://postgres:5432/postgres
       DB_POSTGRES_USERNAME: postgres
       DB_POSTGRES_PASSWORD: postgres
       SCHEDULER_ENABLED: true
-      SERVER_PORT: 8080
+      SERVER_PORT: 8081
       KAFKA_SERVER: kafka:29092
     ports:
       - "8081:8081"

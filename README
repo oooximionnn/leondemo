@@ -2,6 +2,10 @@ Spring Boot + Kafka + Kafka UI + PostgreSQL + Loki + Grafana + Prometheus мон
  
 Быстрый старт
 
+
 git clone https://github.com/oooximionnn/leondemo.git
+Если у вас mac os - раскоментируйте 106 строку в docker-compose.yml
+
 cd (перейти в папку проекта)
-docker compose up -d
+docker-compose build --no-cache && docker-compose up
+
