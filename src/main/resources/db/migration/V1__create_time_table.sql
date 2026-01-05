@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS time (
+    id   UUID      PRIMARY KEY,
+    time TIMESTAMP NOT NULL UNIQUE
+);

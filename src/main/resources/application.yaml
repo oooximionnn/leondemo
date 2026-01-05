@@ -1,0 +1,53 @@
+
+spring:
+  application:
+    name: leondemo
+  datasource:
+    url: ${DB_POSTGRES_URL:jdbc:postgresql://localhost:5433/postgres}
+    username: ${DB_POSTGRES_USERNAME:postgres}
+    password: ${DB_POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 3
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 5000
+      validation-timeout: 3000
+      leak-detection-threshold: 60000
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+#  data:
+#    redis:
+#      host: ${REDIS_HOST:localhost}
+#      port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER:localhost:9092}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    driver-class-name: org.postgresql.Driver
+  output:
+    ansi:
+      enabled: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health, info, prometheus"
+  endpoint:
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+scheduler:
+  enabled: ${SCHEDULER_ENABLED:true}
+
+server:
+  port: ${SERVER_PORT:8080}
