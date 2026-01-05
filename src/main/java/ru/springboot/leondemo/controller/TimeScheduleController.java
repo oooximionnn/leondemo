@@ -23,10 +23,4 @@ public class TimeScheduleController {
             @RequestParam(required = true) int size) {
         return ResponseEntity.ok(timeScheduleService.getAllTimeSchedules(page, size));
     }
-
-    @Operation(summary = "Test")
-    @GetMapping("/test")
-    public ResponseEntity<?> getTest() {
-        return ResponseEntity.ok("Hello World");
-    }
 }

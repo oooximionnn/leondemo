@@ -30,6 +30,12 @@ public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    @Value("${kafka.consumer.group-id}")
+    private String groupId;
+
+    @Value("${kafka.topic}")
+    private String topic;
+
     @Bean
     public ProducerFactory<String, Object> producerFactory(JsonMapper jsonMapper) {
         Map<String, Object> props = new HashMap<>();
@@ -51,7 +57,7 @@ public class KafkaConfig {
         Map<String, Object> props = new HashMap<>();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "time-workers");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
@@ -93,7 +99,7 @@ public class KafkaConfig {
     @Bean
     public NewTopic timeTicksTopic() {
         return TopicBuilder
-                .name("time-ticks")
+                .name(topic)
                 .partitions(1)
                 .build();
     }

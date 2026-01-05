@@ -2,6 +2,7 @@ package ru.springboot.leondemo.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,22 +29,21 @@ public class TimeScheduleService {
     private final TimeRepository timeRepository;
     private final KafkaProducer kafkaProducer;
 
-    //TODO убрать в application.yaml
-    // Ежесекундное формирование сообщений в очередь
+    @Value("${kafka.topic}")
+    private String topic;
+
     @Scheduled(fixedRate = 1000,
             initialDelay = 5000)
     public void tick() {
         TimeEvent event = new TimeEvent();
         event.setTime(LocalDateTime.now());
 
-        //TODO убрать в application.yaml time-ticks
-        kafkaProducer.send("time-ticks", "first_partition", event);
+        kafkaProducer.send(topic, "first_partition", event);
     }
 
-    //TODO убрать в application.yaml time-ticks и прочее
     @KafkaListener(
-            topics = "time-ticks",
-            groupId = "time-workers"
+            topics = "${kafka.topic}",
+            groupId = "${kafka.consumer.group-id}"
     )
     public void consume(TimeEvent timeEvent, Acknowledgment ack) {
 
