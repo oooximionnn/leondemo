@@ -32,7 +32,6 @@ public class TimeSchedule {
             unique = true)
     private LocalDateTime time;
 
-    //TODO mupstruct применить
     public static TimeScheduleDto fromEntity(TimeSchedule timeSchedule) {
         TimeScheduleDto timeScheduleDto = new TimeScheduleDto();
         timeScheduleDto.setTime(timeSchedule.getTime());
