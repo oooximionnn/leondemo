@@ -40,10 +40,12 @@ public class KafkaConfig {
     public ProducerFactory<String, Object> producerFactory(JsonMapper jsonMapper) {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 600_000);
+        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 600_000);
 
         JacksonJsonSerializer<Object> serializer = new JacksonJsonSerializer<>(jsonMapper);
         serializer.setAddTypeInfo(true);
-
 
         return new DefaultKafkaProducerFactory<>(
                 props,
@@ -60,6 +62,9 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 300_000);
+        props.put(ConsumerConfig.CONNECTIONS_MAX_IDLE_MS_CONFIG, 600_000);
+        props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 600_000);
 
         JacksonJsonDeserializer<Object> deserializer =
                 new JacksonJsonDeserializer<>(Object.class, jsonMapper);

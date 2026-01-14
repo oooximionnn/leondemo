@@ -19,6 +19,8 @@ import ru.springboot.leondemo.repository.TimeRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 /**
  * Сервис для работы с TimeSchedule
  */
@@ -48,9 +50,11 @@ public class TimeScheduleService {
     public void consume(TimeEvent timeEvent, Acknowledgment ack) {
 
         TimeSchedule entity = new TimeSchedule();
+        entity.setId(UUID.randomUUID());
         entity.setTime(timeEvent.getTime());
         try {
-            timeRepository.save(entity);
+            log.info("Consumer получил: {}", timeEvent);
+            timeRepository.saveTimeSchedule(entity.getId(), entity.getTime());
             ack.acknowledge();
             log.info("Время сохранено {}", entity.getTime());
 
