@@ -111,6 +111,7 @@ services:
       SCHEDULER_ENABLED: true
       SERVER_PORT: 8081
       KAFKA_SERVER: kafka:29092
+      LOKI_URL: http://loki:3100/loki/api/v1/push
     ports:
       - "8081:8081"
     depends_on:

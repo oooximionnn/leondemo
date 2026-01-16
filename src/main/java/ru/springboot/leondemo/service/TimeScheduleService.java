@@ -7,6 +7,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,12 +15,13 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import ru.springboot.leondemo.dto.TimeEvent;
 import ru.springboot.leondemo.dto.TimeScheduleDto;
 import ru.springboot.leondemo.entity.TimeSchedule;
-import ru.springboot.leondemo.repository.TimeRepository;
+import ru.springboot.leondemo.repository.TimeScheduleRepository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Сервис для работы с TimeSchedule
@@ -28,19 +30,50 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TimeScheduleService {
-    private final TimeRepository timeRepository;
-    private final KafkaProducer kafkaProducer;
+    private final TimeScheduleRepository timeScheduleRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final Queue<TimeEvent> queue = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean draining = new AtomicBoolean(false);
 
     @Value("${kafka.topic}")
     private String topic;
 
-    @Scheduled(fixedRate = 1000,
-            initialDelay = 5000)
+    @Scheduled(cron = "*/1 * * * * *")
     public void tick() {
         TimeEvent event = new TimeEvent();
         event.setTime(LocalDateTime.now());
 
-        kafkaProducer.send(topic, "first_partition", event);
+        queue.offer(event);
+    }
+
+    @Scheduled(fixedDelay = 200, initialDelay = 3000)
+    public void flush() {
+        if (!draining.compareAndSet(false, true)) return;
+        drainNext();
+    }
+
+    private void drainNext() {
+        TimeEvent event = queue.peek();
+        if (event == null) {
+            draining.set(false);
+            return;
+        }
+
+        try {
+            kafkaTemplate.send(topic, "first_partition", event)
+                    .whenComplete((res, ex) -> {
+                        if (ex == null) {
+                            queue.poll();
+                            drainNext();
+                        } else {
+                            draining.set(false);
+                            log.warn("[SEND FAIL async] will retry same head. event={}", event, ex);
+                        }
+                    });
+        } catch (Exception ex) {
+            draining.set(false);
+            log.warn("[SEND FAIL sync] will retry same head. event={}", event, ex);
+        }
     }
 
     @KafkaListener(
@@ -54,7 +87,7 @@ public class TimeScheduleService {
         entity.setTime(timeEvent.getTime());
         try {
             log.info("Consumer получил: {}", timeEvent);
-            timeRepository.saveTimeSchedule(entity.getId(), entity.getTime());
+            timeScheduleRepository.saveTimeSchedule(entity.getId(), entity.getTime());
             ack.acknowledge();
             log.info("Время сохранено {}", entity.getTime());
 
@@ -79,7 +112,7 @@ public class TimeScheduleService {
                 size
         );
 
-        return timeRepository.findAll(pageable)
+        return timeScheduleRepository.findAll(pageable)
                 .map(TimeSchedule::fromEntity)
                 .getContent();
     }

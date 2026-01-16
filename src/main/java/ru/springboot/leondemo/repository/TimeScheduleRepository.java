@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TimeRepository extends JpaRepository<TimeSchedule, UUID> {
+public interface TimeScheduleRepository extends JpaRepository<TimeSchedule, UUID> {
 
     @Query(
             value =

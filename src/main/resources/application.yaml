@@ -48,13 +48,14 @@ management:
 
 scheduler:
   enabled: ${SCHEDULER_ENABLED:true}
-  fixedrate: 1000
-  initialdelay: 5000
 
 kafka:
   consumer:
     group-id: "time-workers"
   topic: "time-ticks"
 
+loki:
+  url: ${LOKI_URL:http://localhost:3100/loki/api/v1/push}
+
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8081}

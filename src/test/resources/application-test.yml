@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    username: postgres
+    password: postgres
+
+loki:
+  enabled: false
